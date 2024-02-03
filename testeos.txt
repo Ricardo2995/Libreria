@@ -1,1 +1,2 @@
 Agregar boton de salir
+Agregar funcionalidad para actualizar
