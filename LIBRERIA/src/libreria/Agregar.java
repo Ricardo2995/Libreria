@@ -4,6 +4,14 @@
  */
 package libreria;
 
+import com.mysql.cj.jdbc.CallableStatement;
+import java.sql.Connection;
+import java.sql.DriverManager;
+import java.sql.PreparedStatement;
+import java.sql.ResultSet;
+import java.sql.SQLException;
+import javax.swing.JOptionPane;
+
 /**
  *
  * @author riich
@@ -15,6 +23,71 @@ public class Agregar extends javax.swing.JFrame {
      */
     public Agregar() {
         initComponents();
+        cargarEditoriales();
+        cargarGeneros();
+        cargarIdiomas();
+
+    }
+
+    public static Connection getConection() {
+        Connection con = null;
+        String base = "db_libreria"; // Nombre de la base de datos
+        String url = "jdbc:mysql://localhost:3306/" + base; // Dirección, puerto y nombre de la Base de Datos
+        String user = "root"; // Usuario de Acceso a MySQL
+        String password = ""; // Password del usuario
+
+        try {
+            Class.forName("com.mysql.cj.jdbc.Driver");
+            con = (Connection) DriverManager.getConnection(url, user, password);
+        } catch (ClassNotFoundException | SQLException e) {
+            JOptionPane.showMessageDialog(null, "Error de conexión: " + e.getMessage());
+        }
+        return con;
+    }
+
+    private void cargarEditoriales() {
+        slcEditorial.removeAllItems();
+
+        try (Connection connection = getConection(); PreparedStatement pst = connection.prepareStatement("SELECT Editorial_Editorial FROM tbl_cat_editorial"); ResultSet rs = pst.executeQuery()) {
+
+            while (rs.next()) {
+                // Agrega cada editorial al JComboBox
+                slcEditorial.addItem(rs.getString("Editorial_Editorial"));
+            }
+        } catch (SQLException ex) {
+            ex.printStackTrace();
+            // Manejo de excepciones (por ejemplo, mostrar un mensaje de error)
+        }
+    }
+
+    private void cargarGeneros() {
+        slcGenero.removeAllItems();
+
+        try (Connection connection = getConection(); PreparedStatement pst = connection.prepareStatement("SELECT Genero_Genero FROM tbl_cat_genero"); ResultSet rs = pst.executeQuery()) {
+
+            while (rs.next()) {
+                // Agrega cada editorial al JComboBox
+                slcGenero.addItem(rs.getString("Genero_Genero"));
+            }
+        } catch (SQLException ex) {
+            ex.printStackTrace();
+            // Manejo de excepciones (por ejemplo, mostrar un mensaje de error)
+        }
+    }
+
+    private void cargarIdiomas() {
+        slcIdioma.removeAllItems();
+
+        try (Connection connection = getConection(); PreparedStatement pst = connection.prepareStatement("SELECT Idioma_Idioma FROM tbl_cat_idioma"); ResultSet rs = pst.executeQuery()) {
+
+            while (rs.next()) {
+                // Agrega cada editorial al JComboBox
+                slcIdioma.addItem(rs.getString("Idioma_Idioma"));
+            }
+        } catch (SQLException ex) {
+            ex.printStackTrace();
+            // Manejo de excepciones (por ejemplo, mostrar un mensaje de error)
+        }
     }
 
     /**
@@ -35,10 +108,11 @@ public class Agregar extends javax.swing.JFrame {
         txtNombre = new javax.swing.JTextField();
         slcEditorial = new javax.swing.JComboBox<>();
         slcGenero = new javax.swing.JComboBox<>();
-        jComboBox3 = new javax.swing.JComboBox<>();
-        jTextField2 = new javax.swing.JTextField();
-        jTextField3 = new javax.swing.JTextField();
+        slcIdioma = new javax.swing.JComboBox<>();
+        txtCosto = new javax.swing.JTextField();
+        txtCantidad = new javax.swing.JTextField();
         jLabel7 = new javax.swing.JLabel();
+        btnAgregar = new javax.swing.JButton();
 
         setDefaultCloseOperation(javax.swing.WindowConstants.EXIT_ON_CLOSE);
 
@@ -54,16 +128,56 @@ public class Agregar extends javax.swing.JFrame {
 
         jLabel6.setText("Cantidad:");
 
+        txtNombre.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                txtNombreActionPerformed(evt);
+            }
+        });
+
         slcEditorial.setModel(new javax.swing.DefaultComboBoxModel<>(new String[] { "Item 1", "Item 2", "Item 3", "Item 4" }));
+        slcEditorial.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                slcEditorialActionPerformed(evt);
+            }
+        });
 
         slcGenero.setModel(new javax.swing.DefaultComboBoxModel<>(new String[] { "Item 1", "Item 2", "Item 3", "Item 4" }));
+        slcGenero.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                slcGeneroActionPerformed(evt);
+            }
+        });
 
-        jComboBox3.setModel(new javax.swing.DefaultComboBoxModel<>(new String[] { "Item 1", "Item 2", "Item 3", "Item 4" }));
+        slcIdioma.setModel(new javax.swing.DefaultComboBoxModel<>(new String[] { "Item 1", "Item 2", "Item 3", "Item 4" }));
+        slcIdioma.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                slcIdiomaActionPerformed(evt);
+            }
+        });
+
+        txtCosto.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                txtCostoActionPerformed(evt);
+            }
+        });
+
+        txtCantidad.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                txtCantidadActionPerformed(evt);
+            }
+        });
 
         jLabel7.setBackground(new java.awt.Color(51, 51, 255));
         jLabel7.setFont(new java.awt.Font("Segoe UI", 1, 18)); // NOI18N
         jLabel7.setForeground(new java.awt.Color(0, 0, 204));
         jLabel7.setText("AGREGAR NUEVO LIBRO");
+
+        btnAgregar.setText("Agregar libro");
+        btnAgregar.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                btnAgregarActionPerformed(evt);
+            }
+        });
 
         javax.swing.GroupLayout layout = new javax.swing.GroupLayout(getContentPane());
         getContentPane().setLayout(layout);
@@ -82,15 +196,20 @@ public class Agregar extends javax.swing.JFrame {
                 .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
                     .addComponent(slcEditorial, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
                     .addComponent(slcGenero, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                    .addComponent(jComboBox3, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                    .addComponent(jTextField3, javax.swing.GroupLayout.DEFAULT_SIZE, 121, Short.MAX_VALUE)
-                    .addComponent(jTextField2)
+                    .addComponent(slcIdioma, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                    .addComponent(txtCantidad, javax.swing.GroupLayout.DEFAULT_SIZE, 121, Short.MAX_VALUE)
+                    .addComponent(txtCosto)
                     .addComponent(txtNombre))
                 .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
             .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, layout.createSequentialGroup()
                 .addContainerGap(97, Short.MAX_VALUE)
-                .addComponent(jLabel7)
-                .addGap(91, 91, 91))
+                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                    .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, layout.createSequentialGroup()
+                        .addComponent(jLabel7)
+                        .addGap(91, 91, 91))
+                    .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, layout.createSequentialGroup()
+                        .addComponent(btnAgregar)
+                        .addGap(33, 33, 33))))
         );
         layout.setVerticalGroup(
             layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
@@ -112,20 +231,80 @@ public class Agregar extends javax.swing.JFrame {
                 .addGap(18, 18, 18)
                 .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
                     .addComponent(jLabel4)
-                    .addComponent(jComboBox3, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
+                    .addComponent(slcIdioma, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
                 .addGap(18, 18, 18)
                 .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
                     .addComponent(jLabel5)
-                    .addComponent(jTextField2, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
+                    .addComponent(txtCosto, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
                 .addGap(18, 18, 18)
                 .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
                     .addComponent(jLabel6)
-                    .addComponent(jTextField3, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
-                .addContainerGap(61, Short.MAX_VALUE))
+                    .addComponent(txtCantidad, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
+                .addGap(18, 18, 18)
+                .addComponent(btnAgregar)
+                .addContainerGap(20, Short.MAX_VALUE))
         );
 
         pack();
     }// </editor-fold>//GEN-END:initComponents
+
+    private void slcEditorialActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_slcEditorialActionPerformed
+        // TODO add your handling code here:
+
+    }//GEN-LAST:event_slcEditorialActionPerformed
+
+    private void slcGeneroActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_slcGeneroActionPerformed
+        // TODO add your handling code here:
+    }//GEN-LAST:event_slcGeneroActionPerformed
+
+    private void slcIdiomaActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_slcIdiomaActionPerformed
+        // TODO add your handling code here:
+    }//GEN-LAST:event_slcIdiomaActionPerformed
+
+    private void txtNombreActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_txtNombreActionPerformed
+        // TODO add your handling code here:
+    }//GEN-LAST:event_txtNombreActionPerformed
+
+    private void txtCostoActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_txtCostoActionPerformed
+        // TODO add your handling code here:
+    }//GEN-LAST:event_txtCostoActionPerformed
+
+    private void txtCantidadActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_txtCantidadActionPerformed
+        // TODO add your handling code here:
+    }//GEN-LAST:event_txtCantidadActionPerformed
+
+    private void btnAgregarActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnAgregarActionPerformed
+        // TODO add your handling code here:
+        // Obtenemos los valores de los campos
+        String nombre = txtNombre.getText();
+        int costo = Integer.parseInt(txtCosto.getText());
+        int cantidad = Integer.parseInt(txtCantidad.getText());
+        String genero = slcGenero.getSelectedItem().toString();
+        String editorial = slcEditorial.getSelectedItem().toString();
+        String idioma = slcIdioma.getSelectedItem().toString();
+
+        // Realizamos la conexión a la base de datos
+        try (Connection con = getConection()) {
+            // Llamamos al procedimiento almacenado
+            try (CallableStatement cstmt = (CallableStatement) con.prepareCall("{call sp_InsertarLibro(?, ?, ?, ?, ?, ?)}")) {
+                // Establecemos los parámetros del procedimiento almacenado
+                cstmt.setString(1, nombre);
+                cstmt.setInt(2, costo);
+                cstmt.setInt(3, cantidad);
+                cstmt.setString(4, genero);
+                cstmt.setString(5, editorial);
+                cstmt.setString(6, idioma);
+
+                // Ejecutamos el procedimiento almacenado
+                cstmt.execute();
+
+                // No se captura ningún valor de salida porque el procedimiento almacenado no devuelve un parámetro específico
+                JOptionPane.showMessageDialog(null, "Operación completada correctamente");
+            }
+        } catch (SQLException e) {
+            JOptionPane.showMessageDialog(null, "Error de conexión: " + e.getMessage());
+        }
+    }//GEN-LAST:event_btnAgregarActionPerformed
 
     /**
      * @param args the command line arguments
@@ -163,7 +342,7 @@ public class Agregar extends javax.swing.JFrame {
     }
 
     // Variables declaration - do not modify//GEN-BEGIN:variables
-    private javax.swing.JComboBox<String> jComboBox3;
+    private javax.swing.JButton btnAgregar;
     private javax.swing.JLabel jLabel1;
     private javax.swing.JLabel jLabel2;
     private javax.swing.JLabel jLabel3;
@@ -171,10 +350,11 @@ public class Agregar extends javax.swing.JFrame {
     private javax.swing.JLabel jLabel5;
     private javax.swing.JLabel jLabel6;
     private javax.swing.JLabel jLabel7;
-    private javax.swing.JTextField jTextField2;
-    private javax.swing.JTextField jTextField3;
     private javax.swing.JComboBox<String> slcEditorial;
     private javax.swing.JComboBox<String> slcGenero;
+    private javax.swing.JComboBox<String> slcIdioma;
+    private javax.swing.JTextField txtCantidad;
+    private javax.swing.JTextField txtCosto;
     private javax.swing.JTextField txtNombre;
     // End of variables declaration//GEN-END:variables
 }
