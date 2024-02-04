@@ -2,3 +2,4 @@ Agregar boton de salir
 Agregar funcionalidad para actualizar
 Agregar funcionalidad para mostrar en una tabla
 Agregar funcionalidad de venta
+Funcionalidades correctas
