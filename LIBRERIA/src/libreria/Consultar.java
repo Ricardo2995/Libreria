@@ -4,18 +4,74 @@
  */
 package libreria;
 
+import java.sql.Connection;
+import java.sql.DriverManager;
+import java.sql.PreparedStatement;
+import java.sql.ResultSet;
+import java.sql.SQLException;
+import javax.swing.JOptionPane;
+import javax.swing.table.DefaultTableModel;
+
 /**
  *
  * @author riich
  */
 public class Consultar extends javax.swing.JFrame {
+    
+    PreparedStatement ps;
+    ResultSet rs;
 
     /**
      * Creates new form Consultar
      */
     public Consultar() {
         initComponents();
+        llenarTabla();
     }
+    
+    public static Connection getConection() {
+        Connection con = null;
+        String base = "db_libreria"; //Nombre de la base de datos
+        String url = "jdbc:mysql://localhost:3306/" + base; //Direccion, puerto y nombre de la Base de Datos
+        String user = "root"; //Usuario de Acceso a MySQL
+        String password = ""; //Password del usuario
+
+        try {
+            Class.forName("com.mysql.cj.jdbc.Driver");
+            con = DriverManager.getConnection(url, user, password);
+        } catch (ClassNotFoundException | SQLException e) {
+            System.err.println(e);
+        }
+        return con;
+    }
+    
+    private void llenarTabla() {
+        DefaultTableModel modelo = new DefaultTableModel();
+        modelo.addColumn("LibroId");
+        modelo.addColumn("Libro_Nombre");
+        modelo.addColumn("Libro_Precio");
+        modelo.addColumn("Libro_Cantidad");
+        modelo.addColumn("Libro_GeneroId");
+        modelo.addColumn("Libro_EditorialId");
+        modelo.addColumn("Libro_IdiomaId");
+
+        try (Connection con = getConection()) {
+            String sql = "SELECT LibroId, Libro_Nombre, Libro_Precio, Libro_Cantidad, Libro_GeneroId, Libro_EditorialId, Libro_IdiomaId FROM tbl_ope_libro";
+            try (PreparedStatement pst = con.prepareStatement(sql)) {
+                ResultSet rs = pst.executeQuery();
+                while (rs.next()) {
+                    Object[] fila = {rs.getInt("LibroId"), rs.getString("Libro_Nombre"), rs.getDouble("Libro_Precio"),rs.getInt("Libro_Cantidad"), rs.getInt("Libro_GeneroId"),rs.getInt("Libro_EditorialId"),rs.getInt("Libro_IdiomaId")};
+                    modelo.addRow(fila);
+                }
+            }
+        } catch (SQLException e) {
+            JOptionPane.showMessageDialog(null, "Error al obtener datos: " + e.getMessage());
+        }
+
+        // Asignar el modelo a tu JTable (tablaConsulta en este caso)
+        tablaConsulta.setModel(modelo);
+    }
+
 
     /**
      * This method is called from within the constructor to initialize the form.
@@ -26,17 +82,36 @@ public class Consultar extends javax.swing.JFrame {
     // <editor-fold defaultstate="collapsed" desc="Generated Code">//GEN-BEGIN:initComponents
     private void initComponents() {
 
+        jScrollPane1 = new javax.swing.JScrollPane();
+        tablaConsulta = new javax.swing.JTable();
+
         setDefaultCloseOperation(javax.swing.WindowConstants.EXIT_ON_CLOSE);
+
+        tablaConsulta.setModel(new javax.swing.table.DefaultTableModel(
+            new Object [][] {
+
+            },
+            new String [] {
+
+            }
+        ));
+        jScrollPane1.setViewportView(tablaConsulta);
 
         javax.swing.GroupLayout layout = new javax.swing.GroupLayout(getContentPane());
         getContentPane().setLayout(layout);
         layout.setHorizontalGroup(
             layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addGap(0, 400, Short.MAX_VALUE)
+            .addGroup(layout.createSequentialGroup()
+                .addContainerGap()
+                .addComponent(jScrollPane1, javax.swing.GroupLayout.DEFAULT_SIZE, 702, Short.MAX_VALUE)
+                .addContainerGap())
         );
         layout.setVerticalGroup(
             layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addGap(0, 300, Short.MAX_VALUE)
+            .addGroup(layout.createSequentialGroup()
+                .addContainerGap()
+                .addComponent(jScrollPane1, javax.swing.GroupLayout.DEFAULT_SIZE, 288, Short.MAX_VALUE)
+                .addContainerGap())
         );
 
         pack();
@@ -78,5 +153,7 @@ public class Consultar extends javax.swing.JFrame {
     }
 
     // Variables declaration - do not modify//GEN-BEGIN:variables
+    private javax.swing.JScrollPane jScrollPane1;
+    private javax.swing.JTable tablaConsulta;
     // End of variables declaration//GEN-END:variables
 }
