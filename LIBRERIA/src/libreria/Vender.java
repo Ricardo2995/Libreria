@@ -4,17 +4,44 @@
  */
 package libreria;
 
+import java.awt.HeadlessException;
+import java.sql.Connection;
+import java.sql.DriverManager;
+import java.sql.PreparedStatement;
+import java.sql.ResultSet;
+import java.sql.SQLException;
+import javax.swing.JOptionPane;
+
 /**
  *
  * @author riich
  */
 public class Vender extends javax.swing.JFrame {
+    
+    PreparedStatement ps;
+    ResultSet rs;
 
     /**
      * Creates new form Vender
      */
     public Vender() {
         initComponents();
+    }
+
+    public static Connection getConection() {
+        Connection con = null;
+        String base = "db_libreria"; //Nombre de la base de datos
+        String url = "jdbc:mysql://localhost:3306/" + base; //Direccion, puerto y nombre de la Base de Datos
+        String user = "root"; //Usuario de Acceso a MySQL
+        String password = ""; //Password del usuario
+
+        try {
+            Class.forName("com.mysql.cj.jdbc.Driver");
+            con = DriverManager.getConnection(url, user, password);
+        } catch (ClassNotFoundException | SQLException e) {
+            System.err.println(e);
+        }
+        return con;
     }
 
     /**
@@ -43,7 +70,18 @@ public class Vender extends javax.swing.JFrame {
 
         jLabel3.setText("Cantidad:");
 
+        txtId.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                txtIdActionPerformed(evt);
+            }
+        });
+
         btnVender.setText("Vender");
+        btnVender.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                btnVenderActionPerformed(evt);
+            }
+        });
 
         javax.swing.GroupLayout layout = new javax.swing.GroupLayout(getContentPane());
         getContentPane().setLayout(layout);
@@ -92,6 +130,67 @@ public class Vender extends javax.swing.JFrame {
         pack();
     }// </editor-fold>//GEN-END:initComponents
 
+    private void txtIdActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_txtIdActionPerformed
+        // TODO add your handling code here:
+    }//GEN-LAST:event_txtIdActionPerformed
+
+    private void btnVenderActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnVenderActionPerformed
+        // TODO add your handling code here:
+        // Obtén el ID del libro desde tu interfaz de usuario (asegúrate de tener el componente correspondiente)
+        int libroId = Integer.parseInt(txtId.getText());
+
+        Connection con;
+
+        try {
+            con = getConection();
+
+            // Busca los datos del libro por su ID
+            String sqlSelect = "SELECT Libro_Nombre, Libro_Precio FROM tbl_ope_libro WHERE LibroId = ?";
+            try (PreparedStatement pstSelect = con.prepareStatement(sqlSelect)) {
+                pstSelect.setInt(1, libroId);
+                ResultSet rs = pstSelect.executeQuery();
+
+                if (rs.next()) {
+                    // Obtiene los datos del libro
+                    String nombreLibro = rs.getString("Libro_Nombre");
+                    double precioLibro = rs.getDouble("Libro_Precio");
+
+                    // Obtiene la cantidad de libros vendidos desde el spinner
+                    int cantidadVenta = (int) spnCantidad.getValue();
+
+                    // Realiza la inserción en tbl_hist_ventas
+                    String sqlInsert = "INSERT INTO tbl_hist_ventas (Libro_Nombre, Libro_Precio, Libro_Cantidad) VALUES (?, ?, ?)";
+                    try (PreparedStatement pstInsert = con.prepareStatement(sqlInsert)) {
+                        pstInsert.setString(1, nombreLibro);
+                        pstInsert.setDouble(2, precioLibro);
+                        pstInsert.setInt(3, cantidadVenta);
+
+                        int resultadoInsert = pstInsert.executeUpdate();
+
+                        if (resultadoInsert > 0) {
+                            JOptionPane.showMessageDialog(null, "Venta registrada correctamente");
+                        } else {
+                            JOptionPane.showMessageDialog(null, "Error al registrar la venta");
+                        }
+                    }
+
+                    limpiarCamposVenta();
+                } else {
+                    JOptionPane.showMessageDialog(null, "No se encontró un libro con el ID proporcionado");
+                }
+            }
+
+            con.close();
+        } catch (HeadlessException | SQLException e) {
+            System.err.println(e);
+        }
+    }//GEN-LAST:event_btnVenderActionPerformed
+    
+    private void limpiarCamposVenta() {
+    // Limpia los campos necesarios después de realizar la venta
+    txtId.setText("");
+    spnCantidad.setValue(0);
+}
     /**
      * @param args the command line arguments
      */
